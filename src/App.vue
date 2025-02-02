@@ -4,8 +4,8 @@
     <header class="h-[15%] flex flex-col items-center justify-center bg-blue-500 text-white text-2xl font-bold">
         <h1 class="w-full text-center">{{ currentYear }}</h1>
         <h3 class="text-sm">今年の恵方巻きの方角は：<strong>{{ currentDetail?.direction }}</strong></h3>
-        <!-- <h4>You facing: {{ deviceRotation }}</h4> -->
-        <h5>Message: {{ message }}</h5>
+        <h4>You facing: {{ deviceRotation.toFixed(1) }}°</h4>
+        <!-- <h5>Message: {{ message }}</h5> -->
     </header>
 
 
@@ -15,9 +15,9 @@
           <div class="body">
               <div class="take"></div>
               <div class="panel">
-                  <div class="hold-bg">
+                  <div class="hold-bg" :style="{ transform: `rotate(${deviceRotation}deg)` }">
                       <div class="glass"></div>
-                      <div class="hold-mark" :style="{ transform: `rotate(${deviceRotation}deg)` }">
+                      <div class="hold-mark">
                           <div v-for="row in 6" :key="row">
                             <span v-for="col in 4" :key="col"></span>
                           </div>
@@ -77,7 +77,8 @@ export default {
       currentDirection: null,
       currentDetail: null,
 
-      deviceRotation: 0,
+      // deviceRotation: 0,
+      deviceRotation: 24,
 
       message: null,
       permissionGranted: false,
