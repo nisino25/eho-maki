@@ -79,6 +79,8 @@ export default {
 
       // deviceRotation: 0,
       deviceRotation: 0,
+      offsetRotation: null, 
+
 
       message: null,
       permissionGranted: false,
@@ -136,32 +138,44 @@ export default {
 
     },
     requestPermission() {
-      if (typeof DeviceOrientationEvent.requestPermission === "function") {
-        DeviceOrientationEvent.requestPermission()
-          .then((permissionState) => {
-            if (permissionState === "granted") {
-              this.message = "Permission granted!";
-              window.addEventListener("deviceorientation", this.handleOrientation);
-            } else {
-              this.message = "Permission denied";
-            }
-          })
-          .catch((err) => {
-            this.message = `Error: ${err}`;
-          });
-      } else {
-        this.message = "Permission request not needed";
-        window.addEventListener("deviceorientation", this.handleOrientation);
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          if (permissionState === "granted") {
+            this.permissionGranted = true;
+            this.message = "Permission granted!";
+
+            // Reset offset when permission is granted
+            this.offsetRotation = null;
+
+            window.addEventListener("deviceorientation", this.handleOrientation);
+          } else {
+            this.message = "Permission denied.";
+          }
+        })
+        .catch((err) => {
+          this.message = `Error: ${err}`;
+        });
+    } else {
+      this.message = "Permission request not needed";
+      window.addEventListener("deviceorientation", this.handleOrientation);
+    }
+  },
+  handleOrientation(event) {
+    if (event.alpha !== null) {
+      if (this.offsetRotation === null) {
+        // Set offset based on first detected orientation
+        this.offsetRotation = event.alpha;
       }
-    },
-    handleOrientation(event) {
-      if (event.alpha !== null) {
-        this.deviceRotation = event.alpha;
-        this.message = `Rotating: ${this.deviceRotation}°`;
-      } else {
-        this.message = "Device orientation not supported";
-      }
-    },
+
+      // Adjust rotation based on initial offset
+      this.deviceRotation = (event.alpha - this.offsetRotation + 360) % 360;
+
+      this.message = `Rotating: ${this.deviceRotation.toFixed(1)}°`;
+    } else {
+      this.message = "Device orientation not supported";
+    }
+  },
 
 
   },
@@ -169,6 +183,7 @@ export default {
   mounted() {
   console.clear();
   this.message = "Waiting for motion permission...";
+  this.requestPermission();
 
   // Check if DeviceOrientationEvent.requestPermission is needed (iOS case)
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
