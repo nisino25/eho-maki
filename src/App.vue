@@ -15,7 +15,7 @@
           <div class="body">
               <div class="take"></div>
               <div class="panel">
-                  <div class="hold-bg" :style="{ transform: `rotate(${deviceRotation}deg)` }">
+                  <div class="hold-bg" :style="{ transform: `rotate(-${deviceRotation}deg)` }">
                       <div class="glass"></div>
                       <div class="hold-mark">
                           <div v-for="row in 6" :key="row">
