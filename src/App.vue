@@ -4,6 +4,8 @@
     <header class="h-[15%] flex flex-col items-center justify-center bg-blue-500 text-white text-2xl font-bold">
         <h1 class="w-full text-center">{{ currentYear }}</h1>
         <h3 class="text-sm">今年の恵方巻きの方角は：<strong>{{ currentDetail?.direction }}</strong></h3>
+        <!-- <h4>You facing: {{ deviceRotation }}</h4> -->
+        <h5>Message: {{ message }}</h5>
     </header>
 
 
@@ -52,8 +54,11 @@
     </main>
 
     <!-- Bottom Section (Controller) -->
-    <footer class="h-[25%] flex items-center justify-center bg-gray-800 text-white">
-        Controller Section
+    <footer class="h-[25%] flex flex-col items-center justify-center bg-gray-800 text-white">
+        Controller Section <br>
+        <button class="bg-gray-200" v-if="!permissionGranted" @click="requestPermission">
+          Enable Motion Sensors
+        </button>
     </footer>
 
   </div>
@@ -72,7 +77,11 @@ export default {
       currentDirection: null,
       currentDetail: null,
 
-      deviceRotation: null,
+      deviceRotation: 0,
+
+      message: null,
+      permissionGranted: false,
+
     }
   },
   methods: {
@@ -124,23 +133,57 @@ export default {
       }
 
     },
-    handleOrientation(event) {
-      if (event.alpha !== null) {
-        this.deviceRotation = event.alpha; // Use alpha (0-360°) to rotate the div
+    requestPermission() {
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+          .then((permissionState) => {
+            if (permissionState === "granted") {
+              this.message = "Permission granted!";
+              window.addEventListener("deviceorientation", this.handleOrientation);
+            } else {
+              this.message = "Permission denied";
+            }
+          })
+          .catch((err) => {
+            this.message = `Error: ${err}`;
+          });
+      } else {
+        this.message = "Permission request not needed";
+        window.addEventListener("deviceorientation", this.handleOrientation);
       }
     },
+    handleOrientation(event) {
+      if (event.alpha !== null) {
+        this.deviceRotation = event.alpha;
+        this.message = `Rotating: ${this.deviceRotation}°`;
+      } else {
+        this.message = "Device orientation not supported";
+      }
+    },
+
+
   },
 
-  mounted(){
-    console.clear();
+  mounted() {
+  console.clear();
+  this.message = "Waiting for motion permission...";
 
+  // Check if DeviceOrientationEvent.requestPermission is needed (iOS case)
+  if (typeof DeviceOrientationEvent.requestPermission === "function") {
+    this.message = "Tap the button to enable motion sensors.";
+
+    // Do not request permission here directly, instead rely on user interaction
+  } else {
+    // If permission is not required (Android, some browsers), attach the event listener directly
+    this.message = "Permission not required, attaching event listener.";
     window.addEventListener("deviceorientation", this.handleOrientation);
+  }
 
-    this.currentYear = new Date().getFullYear();
-    this.getDirection();
+  // Get the current year and determine direction
+  this.currentYear = new Date().getFullYear();
+  this.getDirection();
+},
 
-    
-  },
 
   beforeUnmount() {
     window.removeEventListener("deviceorientation", this.handleOrientation);
@@ -681,7 +724,7 @@ overflow: hidden;
         content: '';
         border-left: 7px solid transparent;
         border-right: 7px solid transparent;
-        border-bottom: 65px solid #d9363b;
+        border-bottom: 64px solid #d9363b;
     }
 
     .main-arrow.down {transform: translateX(-50%) rotate(180deg);}
