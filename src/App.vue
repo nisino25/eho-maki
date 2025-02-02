@@ -138,44 +138,53 @@ export default {
 
     },
     requestPermission() {
-    if (typeof DeviceOrientationEvent.requestPermission === "function") {
-      DeviceOrientationEvent.requestPermission()
-        .then((permissionState) => {
-          if (permissionState === "granted") {
-            this.permissionGranted = true;
-            this.message = "Permission granted!";
-
-            // Reset offset when permission is granted
-            this.offsetRotation = null;
-
-            window.addEventListener("deviceorientation", this.handleOrientation);
-          } else {
-            this.message = "Permission denied.";
-          }
-        })
-        .catch((err) => {
-          this.message = `Error: ${err}`;
-        });
-    } else {
-      this.message = "Permission request not needed";
-      window.addEventListener("deviceorientation", this.handleOrientation);
-    }
-  },
-  handleOrientation(event) {
-    if (event.alpha !== null) {
-      if (this.offsetRotation === null) {
-        // Set offset based on first detected orientation
-        this.offsetRotation = event.alpha;
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+          .then((permissionState) => {
+            if (permissionState === "granted") {
+              this.permissionGranted = true;
+              this.message = "Permission granted!";
+              this.offsetRotation = null;
+              window.addEventListener("deviceorientation", this.handleOrientation.bind(this));
+            } else {
+              this.message = "Permission denied.";
+            }
+          })
+          .catch((err) => {
+            this.message = `Error: ${err}`;
+          });
+      } else {
+        this.message = "Permission request not needed";
+        window.addEventListener("deviceorientation", this.handleOrientation.bind(this));
       }
+    },
 
-      // Adjust rotation based on initial offset
-      this.deviceRotation = (event.alpha - this.offsetRotation + 360) % 360;
+    handleOrientation(event) {
+      // Use webkitCompassHeading for iOS devices
+      let heading = event.webkitCompassHeading || event.alpha;
+      
+      if (heading !== null) {
+        if (this.offsetRotation === null) {
+          this.offsetRotation = heading;
+        }
 
-      this.message = `Rotating: ${this.deviceRotation.toFixed(1)}°`;
-    } else {
-      this.message = "Device orientation not supported";
+        // For non-iOS devices, convert alpha to compass heading
+        if (event.webkitCompassHeading === undefined) {
+          // Convert alpha value to compass heading
+          heading = 360 - heading;
+        }
+
+        this.deviceRotation = heading;
+        
+        // Get cardinal direction
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const index = Math.round(heading / 45) % 8;
+        
+        this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
+      } else {
+        this.message = "Device orientation not supported";
+      }
     }
-  },
 
 
   },
