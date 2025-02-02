@@ -160,35 +160,30 @@ export default {
     },
 
     handleOrientation(event) {
-  // Use webkitCompassHeading for iOS devices
-  let heading = event.webkitCompassHeading || event.alpha;
-  
-  if (heading !== null) {
-    if (this.offsetRotation === null) {
-      this.offsetRotation = heading;
-    }
+    let heading = event.webkitCompassHeading || event.alpha;
 
-    // For non-iOS devices using alpha value
-    if (event.webkitCompassHeading === undefined) {
-      // First convert alpha range (0-360) to compass heading
-      // heading = heading;
-      
-      // Then adjust the direction to match compass directions
-      // This fixes the east/west flip issue
-      heading = (360 - heading + 270) % 360;
-    }
+    if (heading !== null) {
+        if (this.offsetRotation === null) {
+            this.offsetRotation = heading;
+        }
 
-    this.deviceRotation = heading;
-    
-    // Get cardinal direction
-    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    const index = Math.round(heading / 45) % 8;
-    
-    this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
-  } else {
-    this.message = "Device orientation not supported";
-  }
+        // Adjust the heading to match the compass orientation
+        if (event.webkitCompassHeading === undefined) {
+            heading = (360 - heading) % 360; // Flip East/West correctly
+        }
+
+        this.deviceRotation = heading;
+
+        // Get correct cardinal direction
+        const directions = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+        const index = Math.round(heading / 45) % 8;
+
+        this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
+    } else {
+        this.message = "Device orientation not supported";
+    }
 }
+
 
 
   },
