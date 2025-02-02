@@ -56,7 +56,7 @@
     <!-- Bottom Section (Controller) -->
     <footer class="h-[25%] flex flex-col items-center justify-center bg-gray-800 text-white">
         Controller Section <br>
-        <button class="bg-gray-200" v-if="!permissionGranted" @click="requestPermission">
+        <button class="bg-gray-400" v-if="!permissionGranted" @click="requestPermission">
           Enable Motion Sensors
         </button>
     </footer>
@@ -171,16 +171,10 @@ export default {
         // For non-iOS devices, convert alpha to compass heading
         if (event.webkitCompassHeading === undefined) {
           // Convert alpha value to compass heading
-          heading = 360 - heading;
+          heading = 360 + heading;
         }
 
         this.deviceRotation = heading;
-        
-        // Get cardinal direction
-        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-        const index = Math.round(heading / 45) % 8;
-        
-        this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
       } else {
         this.message = "Device orientation not supported";
       }
