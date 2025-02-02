@@ -160,25 +160,35 @@ export default {
     },
 
     handleOrientation(event) {
-      // Use webkitCompassHeading for iOS devices
-      let heading = event.webkitCompassHeading || event.alpha;
-      
-      if (heading !== null) {
-        if (this.offsetRotation === null) {
-          this.offsetRotation = heading;
-        }
-
-        // For non-iOS devices, convert alpha to compass heading
-        if (event.webkitCompassHeading === undefined) {
-          // Convert alpha value to compass heading
-          heading = 360 + heading;
-        }
-
-        this.deviceRotation = heading;
-      } else {
-        this.message = "Device orientation not supported";
-      }
+  // Use webkitCompassHeading for iOS devices
+  let heading = event.webkitCompassHeading || event.alpha;
+  
+  if (heading !== null) {
+    if (this.offsetRotation === null) {
+      this.offsetRotation = heading;
     }
+
+    // For non-iOS devices using alpha value
+    if (event.webkitCompassHeading === undefined) {
+      // First convert alpha range (0-360) to compass heading
+      // heading = heading;
+      
+      // Then adjust the direction to match compass directions
+      // This fixes the east/west flip issue
+      heading = (360 - heading + 270) % 360;
+    }
+
+    this.deviceRotation = heading;
+    
+    // Get cardinal direction
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(heading / 45) % 8;
+    
+    this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
+  } else {
+    this.message = "Device orientation not supported";
+  }
+}
 
 
   },
@@ -186,7 +196,7 @@ export default {
   mounted() {
   console.clear();
   this.message = "Waiting for motion permission...";
-  // this.requestPermission();
+  this.requestPermission();
 
   // Check if DeviceOrientationEvent.requestPermission is needed (iOS case)
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
