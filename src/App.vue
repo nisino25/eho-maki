@@ -3,7 +3,7 @@
     <!-- Top Section (Title) -->
     <header class="h-[15%] flex flex-col items-center justify-center bg-blue-500 text-white text-2xl font-bold">
         <h1 class="w-full text-center">{{ currentYear }}</h1>
-        <h3 class="text-sm">今年の恵方巻きの方角は：<strong>{{ currentDetail?.direction }}</strong></h3>
+        <h3 class="text-sm">今年の恵方巻きの方角は：<strong>{{ currentDetail?.direction }} / {{ currentDetail?.degrees }}°</strong></h3>
         <h4>You facing: {{ deviceRotation.toFixed(1) }}°</h4>
         <!-- <h5>Message: {{ message }}</h5> -->
     </header>
@@ -78,7 +78,7 @@ export default {
       currentDetail: null,
 
       // deviceRotation: 0,
-      deviceRotation: 24,
+      deviceRotation: 0,
 
       message: null,
       permissionGranted: false,
@@ -130,7 +130,8 @@ export default {
       this.currentDetail = {
         direction,
         exactDirection,
-        degrees,japaneseName
+        degrees,
+        japaneseName,
       }
 
     },
@@ -449,9 +450,7 @@ overflow: hidden;
 /*  BG
 ========================================================================== */
 .hold-bg {
-    transition: all 1s ease-in-out;
-    transition-delay: .5s;
-    transform: rotate(45deg);
+    /* transition: all 1s ease-in-out; */
 
     position: absolute;
     width: 100%;
