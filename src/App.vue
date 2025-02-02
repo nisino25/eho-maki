@@ -183,7 +183,7 @@ export default {
   mounted() {
   console.clear();
   this.message = "Waiting for motion permission...";
-  this.requestPermission();
+  // this.requestPermission();
 
   // Check if DeviceOrientationEvent.requestPermission is needed (iOS case)
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
