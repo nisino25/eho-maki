@@ -3,8 +3,8 @@
     <!-- Top Section (Title) -->
     <header class="h-[15%] flex flex-col items-center justify-center bg-blue-500 text-white text-2xl font-bold">
         <h1 class="w-full text-center">{{ currentYear }}</h1>
-        <h3 class="text-sm">今年の恵方巻きの方角は：<strong>{{ currentDetail?.direction }} / {{ currentDetail?.degrees }}°</strong></h3>
-        <h4>You facing: {{ deviceRotation.toFixed(1) }}°</h4>
+        <h3 class="text-sm">{{currentYear}}の恵方巻きの方角は：<strong>{{ currentDetail?.direction }} / {{ currentDetail?.degrees }}°</strong></h3>
+        <h5 class="text-sm">現在の方角は: {{ deviceRotation.toFixed(1) }}°</h5>
         <!-- <h5>Message: {{ message }}</h5> -->
     </header>
 
@@ -55,10 +55,14 @@
 
     <!-- Bottom Section (Controller) -->
     <footer class="h-[25%] flex flex-col items-center justify-center bg-gray-800 text-white">
-        Controller Section <br>
         <button class="bg-gray-400" v-if="!permissionGranted" @click="requestPermission">
           Enable Motion Sensors
         </button>
+        <div class="flex items-center justify-center gap-10" v-else>
+          <button @click="changeYear(-1)">-</button>
+          <h5>{{ currentYear }}</h5>
+          <button @click="changeYear(1)">+</button>
+        </div>
     </footer>
 
   </div>
@@ -160,29 +164,33 @@ export default {
     },
 
     handleOrientation(event) {
-    let heading = event.webkitCompassHeading || event.alpha;
+      let heading = event.webkitCompassHeading || event.alpha;
 
-    if (heading !== null) {
-        if (this.offsetRotation === null) {
-            this.offsetRotation = heading;
-        }
+      if (heading !== null) {
+          if (this.offsetRotation === null) {
+              this.offsetRotation = heading;
+          }
 
-        // Adjust the heading to match the compass orientation
-        if (event.webkitCompassHeading === undefined) {
-            heading = (360 - heading) % 360; // Flip East/West correctly
-        }
+          // Adjust the heading to match the compass orientation
+          if (event.webkitCompassHeading === undefined) {
+              heading = (360 - heading) % 360; // Flip East/West correctly
+          }
 
-        this.deviceRotation = heading;
+          this.deviceRotation = heading;
 
-        // Get correct cardinal direction
-        const directions = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
-        const index = Math.round(heading / 45) % 8;
+          // Get correct cardinal direction
+          const directions = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+          const index = Math.round(heading / 45) % 8;
 
-        this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
-    } else {
-        this.message = "Device orientation not supported";
-    }
-}
+          this.message = `${this.deviceRotation.toFixed(1)}° ${directions[index]}`;
+      } else {
+          this.message = "Device orientation not supported";
+      }
+  },
+  changeYear(num){
+    this.currentYear = this.currentYear + num
+    this.getDirection();
+  }
 
 
 
